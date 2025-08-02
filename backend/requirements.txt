@@ -19,7 +19,7 @@ faiss-cpu==1.7.4
 whoosh==2.7.4
 
 # Machine Learning & NLP
-torch==2.1.1
+torch==2.5.1
 transformers==4.36.0
 sentence-transformers==2.2.2
 spacy==3.7.2
