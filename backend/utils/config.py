@@ -120,32 +120,45 @@ class Settings(BaseSettings):
     CONTENT_SAFETY_THRESHOLD: float = Field(default=0.8, env="CONTENT_SAFETY_THRESHOLD")
     
     @field_validator("DATABASE_URL", mode='before')
-    def build_database_url(cls, v, values):
+    @classmethod
+    def build_database_url(cls, v, info):
         """Build database URL from individual components if not provided"""
         if v:
             return v
         
-        return PostgresDsn.build(
-            scheme="postgresql",
-            user=values.get("DATABASE_USER"),
-            password=values.get("DATABASE_PASSWORD"),
-            host=values.get("DATABASE_HOST"),
-            port=str(values.get("DATABASE_PORT")),
-            path=f"/{values.get('DATABASE_NAME')}"
-        )
+        data = info.data
+        # Only build URL if we have the required components
+        if data.get("DATABASE_HOST") and data.get("DATABASE_NAME"):
+            return PostgresDsn.build(
+                scheme="postgresql",
+                username=data.get("DATABASE_USER"),
+                password=data.get("DATABASE_PASSWORD"),
+                host=data.get("DATABASE_HOST"),
+                port=data.get("DATABASE_PORT"),
+                path=f"/{data.get('DATABASE_NAME')}"
+            )
+        return None
     
     @field_validator("REDIS_URL", mode='before')
-    def build_redis_url(cls, v, values):
+    @classmethod
+    def build_redis_url(cls, v, info):
         """Build Redis URL from individual components if not provided"""
         if v:
             return v
         
-        password = values.get("REDIS_PASSWORD")
-        auth = f":{password}@" if password else ""
-        
-        return f"redis://{auth}{values.get('REDIS_HOST')}:{values.get('REDIS_PORT')}/{values.get('REDIS_DB')}"
+        data = info.data
+        # Only build URL if we have the required components
+        if data.get("REDIS_HOST"):
+            password = data.get("REDIS_PASSWORD")
+            auth = f":{password}@" if password else ""
+            port = data.get("REDIS_PORT", 6379)
+            db = data.get("REDIS_DB", 0)
+            
+            return f"redis://{auth}{data.get('REDIS_HOST')}:{port}/{db}"
+        return None
     
     @field_validator("ALLOWED_HOSTS", "ALLOWED_ORIGINS", "ALLOWED_IMAGE_TYPES", mode='before')
+    @classmethod
     def parse_list_from_string(cls, v):
         """Parse comma-separated string into list"""
         if isinstance(v, str):
@@ -153,6 +166,7 @@ class Settings(BaseSettings):
         return v
     
     @field_validator("LOG_LEVEL")
+    @classmethod
     def validate_log_level(cls, v):
         """Validate log level"""
         valid_levels = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
