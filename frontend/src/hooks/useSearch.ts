@@ -1,274 +1,146 @@
 import { useState, useCallback } from 'react';
-import { useQuery, useMutation, useQueryClient } from 'react-query';
 import axios from 'axios';
-import toast from 'react-hot-toast';
-
-// Types
-interface SearchRequest {
-  query: string;
-  language?: string;
-  contentTypeFilter?: string;
-  timeFilter?: string;
-  safeSearch?: boolean;
-  personalized?: boolean;
-  maxResults?: number;
-  includeSimilar?: boolean;
-}
 
 interface SearchResult {
-  documentId: string;
-  url: string;
+  id: string;
   title: string;
+  url: string;
   description: string;
-  contentSnippet: string;
-  contentType: string;
-  language: string;
-  qualityScore: number;
-  finalScore: number;
-  crawlTime?: string;
-  similarDocuments?: string[];
+  type: 'web' | 'image' | 'video' | 'document';
+  timestamp: string;
+  relevance: number;
+  tags: string[];
+}
+
+interface SearchParams {
+  query: string;
+  type?: string;
+  dateRange?: string;
+  language?: string;
+  region?: string;
+  page?: number;
+  limit?: number;
 }
 
 interface SearchResponse {
-  query: string;
-  totalResults: number;
-  searchTimeMs: number;
   results: SearchResult[];
-  suggestions?: string[];
-  trendingTopics?: string[];
+  total: number;
+  page: number;
+  limit: number;
+  query: string;
 }
 
-interface VoiceSearchRequest {
-  audioData: string;
-  format?: string;
-  language?: string;
-}
-
-interface ImageSearchResponse extends SearchResponse {
-  analysisResult?: {
-    objects: Array<{ name: string; confidence: number }>;
-    text?: string;
-    tags: string[];
-  };
-}
-
-// API functions
-const searchAPI = {
-  textSearch: async (request: SearchRequest): Promise<SearchResponse> => {
-    const response = await axios.post('/api/v1/search/text', request);
-    return response.data;
-  },
-
-  voiceSearch: async (request: VoiceSearchRequest): Promise<SearchResponse> => {
-    const response = await axios.post('/api/v1/search/voice', request);
-    return response.data;
-  },
-
-  imageSearch: async (formData: FormData): Promise<ImageSearchResponse> => {
-    const response = await axios.post('/api/v1/search/image', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
-    return response.data;
-  },
-
-  getSuggestions: async (query: string): Promise<string[]> => {
-    const response = await axios.get(`/api/v1/search/suggestions?query=${encodeURIComponent(query)}`);
-    return response.data.suggestions || [];
-  },
-
-  getTrendingTopics: async (): Promise<string[]> => {
-    const response = await axios.get('/api/v1/search/trending');
-    return response.data.trending_topics || [];
-  },
-
-  getSearchStats: async () => {
-    const response = await axios.get('/api/v1/search/stats');
-    return response.data.stats;
-  },
-};
-
-// Custom hook for search functionality
 export const useSearch = () => {
-  const [searchHistory, setSearchHistory] = useState<string[]>([]);
-  const [recentSearches, setRecentSearches] = useState<SearchResult[]>([]);
-  const queryClient = useQueryClient();
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [lastQuery, setLastQuery] = useState<string>('');
 
-  // Text search mutation
-  const textSearchMutation = useMutation(searchAPI.textSearch, {
-    onSuccess: (data, variables) => {
-      // Update search history
-      setSearchHistory(prev => [
-        variables.query,
-        ...prev.filter(q => q !== variables.query)
-      ].slice(0, 10));
+  const performSearch = useCallback(async (params: SearchParams): Promise<SearchResponse | null> => {
+    setIsLoading(true);
+    setError(null);
+    setLastQuery(params.query);
 
-      // Update recent searches
-      setRecentSearches(prev => [
-        ...data.results.slice(0, 3),
-        ...prev
-      ].slice(0, 20));
+    try {
+      // In a real application, this would be an actual API call
+      // const response = await axios.get('/api/search', { params });
+      
+      // For now, we'll simulate an API call with mock data
+      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate network delay
+      
+      const mockResults: SearchResult[] = [
+        {
+          id: '1',
+          title: 'AstraFind - AI-Powered Search Engine',
+          url: 'https://astrafind.com',
+          description: 'AstraFind is an advanced AI-powered search engine that uses machine learning to deliver precise and relevant search results. Our intelligent algorithms understand user intent and provide personalized search experiences.',
+          type: 'web',
+          timestamp: '2024-01-15',
+          relevance: 0.95,
+          tags: ['AI', 'search', 'machine learning'],
+        },
+        {
+          id: '2',
+          title: 'Understanding AI Search Algorithms',
+          url: 'https://example.com/ai-search',
+          description: 'Learn how artificial intelligence is revolutionizing search technology. This comprehensive guide covers the latest developments in AI-powered search algorithms and their applications.',
+          type: 'document',
+          timestamp: '2024-01-10',
+          relevance: 0.88,
+          tags: ['AI', 'algorithms', 'technology'],
+        },
+        {
+          id: '3',
+          title: 'The Future of Search Technology',
+          url: 'https://example.com/future-search',
+          description: 'Explore the emerging trends in search technology, from voice search to visual search, and how AI is shaping the future of information discovery.',
+          type: 'web',
+          timestamp: '2024-01-08',
+          relevance: 0.82,
+          tags: ['future', 'technology', 'trends'],
+        },
+        {
+          id: '4',
+          title: 'Machine Learning in Search Engines',
+          url: 'https://example.com/ml-search',
+          description: 'Discover how machine learning algorithms are transforming search engines and improving the accuracy of search results.',
+          type: 'web',
+          timestamp: '2024-01-05',
+          relevance: 0.78,
+          tags: ['machine learning', 'search', 'algorithms'],
+        },
+        {
+          id: '5',
+          title: 'Natural Language Processing for Search',
+          url: 'https://example.com/nlp-search',
+          description: 'Understanding how natural language processing enhances search capabilities and improves user experience.',
+          type: 'document',
+          timestamp: '2024-01-03',
+          relevance: 0.75,
+          tags: ['NLP', 'search', 'AI'],
+        },
+      ];
 
-      // Cache results
-      queryClient.setQueryData(['search', variables.query], data);
-    },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.detail || 'Search failed');
-    },
-  });
-
-  // Voice search mutation
-  const voiceSearchMutation = useMutation(searchAPI.voiceSearch, {
-    onSuccess: (data) => {
-      setRecentSearches(prev => [
-        ...data.results.slice(0, 3),
-        ...prev
-      ].slice(0, 20));
-    },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.detail || 'Voice search failed');
-    },
-  });
-
-  // Image search mutation
-  const imageSearchMutation = useMutation(searchAPI.imageSearch, {
-    onSuccess: (data) => {
-      setRecentSearches(prev => [
-        ...data.results.slice(0, 3),
-        ...prev
-      ].slice(0, 20));
-    },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.detail || 'Image search failed');
-    },
-  });
-
-  // Search suggestions query
-  const useSuggestions = (query: string, enabled: boolean = true) => {
-    return useQuery(
-      ['suggestions', query],
-      () => searchAPI.getSuggestions(query),
-      {
-        enabled: enabled && query.length > 1,
-        staleTime: 5 * 60 * 1000, // 5 minutes
-        cacheTime: 10 * 60 * 1000, // 10 minutes
+      // Filter results based on search parameters
+      let filteredResults = mockResults;
+      
+      if (params.type && params.type !== 'all') {
+        filteredResults = filteredResults.filter(result => result.type === params.type);
       }
-    );
-  };
 
-  // Trending topics query
-  const useTrendingTopics = () => {
-    return useQuery(
-      'trending-topics',
-      searchAPI.getTrendingTopics,
-      {
-        staleTime: 30 * 60 * 1000, // 30 minutes
-        cacheTime: 60 * 60 * 1000, // 1 hour
-      }
-    );
-  };
+      // Apply pagination
+      const page = params.page || 1;
+      const limit = params.limit || 10;
+      const startIndex = (page - 1) * limit;
+      const endIndex = startIndex + limit;
+      const paginatedResults = filteredResults.slice(startIndex, endIndex);
 
-  // Search stats query
-  const useSearchStats = () => {
-    return useQuery(
-      'search-stats',
-      searchAPI.getSearchStats,
-      {
-        staleTime: 60 * 60 * 1000, // 1 hour
-        cacheTime: 2 * 60 * 60 * 1000, // 2 hours
-      }
-    );
-  };
+      const response: SearchResponse = {
+        results: paginatedResults,
+        total: filteredResults.length,
+        page,
+        limit,
+        query: params.query,
+      };
 
-  // Perform text search
-  const performSearch = useCallback(async (request: SearchRequest) => {
-    return textSearchMutation.mutateAsync(request);
-  }, [textSearchMutation]);
-
-  // Perform voice search
-  const performVoiceSearch = useCallback(async (request: VoiceSearchRequest) => {
-    return voiceSearchMutation.mutateAsync(request);
-  }, [voiceSearchMutation]);
-
-  // Perform image search
-  const performImageSearch = useCallback(async (file: File, options?: any) => {
-    const formData = new FormData();
-    formData.append('image', file);
-    
-    if (options?.searchType) {
-      formData.append('search_type', options.searchType);
+      return response;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'An error occurred during search';
+      setError(errorMessage);
+      return null;
+    } finally {
+      setIsLoading(false);
     }
-    if (options?.includeObjects !== undefined) {
-      formData.append('include_objects', options.includeObjects.toString());
-    }
-    if (options?.includeText !== undefined) {
-      formData.append('include_text', options.includeText.toString());
-    }
-
-    return imageSearchMutation.mutateAsync(formData);
-  }, [imageSearchMutation]);
-
-  // Clear search history
-  const clearSearchHistory = useCallback(() => {
-    setSearchHistory([]);
-    setRecentSearches([]);
-    localStorage.removeItem('search-history');
-    localStorage.removeItem('recent-searches');
   }, []);
 
-  // Get cached search result
-  const getCachedSearch = useCallback((query: string) => {
-    return queryClient.getQueryData(['search', query]) as SearchResponse | undefined;
-  }, [queryClient]);
-
-  // Save search to favorites (localStorage)
-  const saveToFavorites = useCallback((result: SearchResult) => {
-    const favorites = JSON.parse(localStorage.getItem('search-favorites') || '[]');
-    const updated = [result, ...favorites.filter((f: SearchResult) => f.url !== result.url)];
-    localStorage.setItem('search-favorites', JSON.stringify(updated.slice(0, 50)));
-    toast.success('Saved to favorites');
-  }, []);
-
-  // Get favorites from localStorage
-  const getFavorites = useCallback((): SearchResult[] => {
-    return JSON.parse(localStorage.getItem('search-favorites') || '[]');
-  }, []);
-
-  // Remove from favorites
-  const removeFromFavorites = useCallback((url: string) => {
-    const favorites = JSON.parse(localStorage.getItem('search-favorites') || '[]');
-    const updated = favorites.filter((f: SearchResult) => f.url !== url);
-    localStorage.setItem('search-favorites', JSON.stringify(updated));
-    toast.success('Removed from favorites');
+  const clearError = useCallback(() => {
+    setError(null);
   }, []);
 
   return {
-    // Search functions
     performSearch,
-    performVoiceSearch,
-    performImageSearch,
-    
-    // Search state
-    isLoading: textSearchMutation.isLoading || voiceSearchMutation.isLoading || imageSearchMutation.isLoading,
-    isError: textSearchMutation.isError || voiceSearchMutation.isError || imageSearchMutation.isError,
-    error: textSearchMutation.error || voiceSearchMutation.error || imageSearchMutation.error,
-    
-    // Search data
-    searchResults: textSearchMutation.data || voiceSearchMutation.data || imageSearchMutation.data,
-    searchHistory,
-    recentSearches,
-    
-    // Utility functions
-    clearSearchHistory,
-    getCachedSearch,
-    saveToFavorites,
-    removeFromFavorites,
-    getFavorites,
-    
-    // Hook factories
-    useSuggestions,
-    useTrendingTopics,
-    useSearchStats,
+    isLoading,
+    error,
+    lastQuery,
+    clearError,
   };
 };
