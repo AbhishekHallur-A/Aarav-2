@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { TrendingUpIcon, FireIcon } from '@heroicons/react/24/outline';
+import { ArrowTrendingUpIcon, FireIcon } from '@heroicons/react/24/outline';
 
 interface TrendingTopicsProps {
   onTopicClick: (topic: string) => void;
@@ -71,7 +71,7 @@ const TrendingTopics: React.FC<TrendingTopicsProps> = ({
               </div>
             </div>
             <div className="flex items-center space-x-2">
-              <TrendingUpIcon className="h-4 w-4 text-green-500" />
+              <ArrowTrendingUpIcon className="h-4 w-4 text-green-500" />
               <span className="text-sm font-medium text-green-600 dark:text-green-400">
                 {item.trend}
               </span>

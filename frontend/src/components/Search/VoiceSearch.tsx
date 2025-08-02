@@ -26,7 +26,7 @@ interface SpeechRecognitionResult {
 }
 
 interface SpeechRecognitionResultList {
-  [index: number]: SpeechRecognitionResult;
+  [index: number]: SpeechRecognitionResult & { isFinal: boolean };
   length: number;
 }
 
@@ -81,7 +81,7 @@ const VoiceSearch: React.FC<VoiceSearchProps> = ({
       setupAudioAnalysis();
     };
 
-    recognitionRef.current.onresult = (event: SpeechRecognitionEvent) => {
+    recognitionRef.current.onresult = (event: any) => {
       let finalTranscript = '';
       let interimTranscript = '';
 

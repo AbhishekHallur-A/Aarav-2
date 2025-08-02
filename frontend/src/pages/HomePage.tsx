@@ -114,12 +114,8 @@ const HomePage: React.FC = () => {
           >
             <div className="relative">
               <SearchBox
-                ref={searchInputRef}
-                value={searchQuery}
-                onChange={setSearchQuery}
-                onSubmit={handleSearch}
-                onFocus={() => setIsSearchFocused(true)}
-                onBlur={() => setIsSearchFocused(false)}
+                initialQuery={searchQuery}
+                onSearch={handleSearch}
                 placeholder="Search anything..."
                 className="w-full px-6 py-4 text-lg rounded-full border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 shadow-lg focus:border-blue-500 focus:shadow-xl transition-all duration-200"
               />
@@ -176,8 +172,7 @@ const HomePage: React.FC = () => {
                   className="mt-4"
                 >
                   <QuickSearchSuggestions
-                    query={searchQuery}
-                    onSelect={(suggestion) => {
+                    onSuggestionClick={(suggestion) => {
                       setSearchQuery(suggestion);
                       handleSearch(suggestion);
                     }}
@@ -204,7 +199,7 @@ const HomePage: React.FC = () => {
           transition={{ duration: 0.6, delay: 0.6 }}
           className="mb-16"
         >
-          <TrendingTopics onTopicSelect={handleSearch} />
+          <TrendingTopics onTopicClick={handleSearch} />
         </motion.div>
 
         {/* Features Section */}

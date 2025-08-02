@@ -188,6 +188,7 @@ const SearchBox: React.FC<SearchBoxProps> = ({
       <AnimatePresence>
         {showVoiceSearch && (
           <VoiceSearch
+            isOpen={showVoiceSearch}
             onResult={handleVoiceResult}
             onClose={() => setShowVoiceSearch(false)}
           />
@@ -198,7 +199,8 @@ const SearchBox: React.FC<SearchBoxProps> = ({
       <AnimatePresence>
         {showImageSearch && (
           <ImageSearch
-            onUpload={handleImageUpload}
+            isOpen={showImageSearch}
+            onImageUpload={handleImageUpload}
             onClose={() => setShowImageSearch(false)}
           />
         )}

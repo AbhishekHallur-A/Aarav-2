@@ -5,10 +5,15 @@ import { Toaster } from 'react-hot-toast';
 
 // Pages
 import HomePage from './pages/HomePage';
+import SearchResultsPage from './pages/SearchResultsPage';
+import AdvancedSearchPage from './pages/AdvancedSearchPage';
+import SettingsPage from './pages/SettingsPage';
+import PrivacyPage from './pages/PrivacyPage';
 
 // Components
 import Header from './components/Layout/Header';
 import Footer from './components/Layout/Footer';
+import LoadingSpinner from './components/UI/LoadingSpinner';
 
 // Hooks
 import { useTheme } from './hooks/useTheme';
@@ -39,6 +44,10 @@ function App() {
           <main className="flex-1">
             <Routes>
               <Route path="/" element={<HomePage />} />
+              <Route path="/search" element={<SearchResultsPage />} />
+              <Route path="/advanced" element={<AdvancedSearchPage />} />
+              <Route path="/settings" element={<SettingsPage />} />
+              <Route path="/privacy" element={<PrivacyPage />} />
             </Routes>
           </main>
           
