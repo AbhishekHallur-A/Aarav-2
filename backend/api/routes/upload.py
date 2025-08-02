@@ -11,9 +11,9 @@ from fastapi import APIRouter, HTTPException, UploadFile, File, Form, Depends
 from pydantic import BaseModel, Field
 import structlog
 
-from ...services.ml.image_processor import ImageProcessor
-from ...services.elasticsearch_client import ElasticsearchManager
-from ...utils.config import settings
+from services.ml.image_processor import ImageProcessor
+from services.elasticsearch_client import ElasticsearchManager
+from utils.config import settings
 
 logger = structlog.get_logger(__name__)
 

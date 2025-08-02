@@ -11,10 +11,10 @@ from fastapi import APIRouter, HTTPException, Query, Depends
 from pydantic import BaseModel, Field
 import structlog
 
-from ...services.elasticsearch_client import ElasticsearchManager
-from ...services.redis_client import RedisManager
-from ...services.database import DatabaseManager
-from ...utils.config import settings
+from services.elasticsearch_client import ElasticsearchManager
+from services.redis_client import RedisManager
+from services.database import DatabaseManager
+from utils.config import settings
 
 logger = structlog.get_logger(__name__)
 

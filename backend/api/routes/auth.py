@@ -12,7 +12,7 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel, Field
 import structlog
 
-from ...utils.config import settings
+from utils.config import settings
 
 logger = structlog.get_logger(__name__)
 

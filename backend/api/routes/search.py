@@ -11,12 +11,12 @@ from fastapi import APIRouter, HTTPException, Query, UploadFile, File, Form, Dep
 from pydantic import BaseModel, Field
 import structlog
 
-from ...services.search.hybrid_ranker import HybridSearchRanker, SearchQuery, SearchResult
-from ...services.indexer.semantic_indexer import SemanticIndexer
-from ...services.elasticsearch_client import ElasticsearchManager
-from ...services.ml.image_processor import ImageProcessor
-from ...services.ml.voice_processor import VoiceProcessor
-from ...utils.config import settings
+from services.search.hybrid_ranker import HybridSearchRanker, SearchQuery, SearchResult
+from services.indexer.semantic_indexer import SemanticIndexer
+from services.elasticsearch_client import ElasticsearchManager
+from services.ml.image_processor import ImageProcessor
+from services.ml.voice_processor import VoiceProcessor
+from utils.config import settings
 
 logger = structlog.get_logger(__name__)
 

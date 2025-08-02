@@ -11,7 +11,7 @@ from elasticsearch import AsyncElasticsearch
 from elasticsearch.exceptions import ConnectionError, NotFoundError
 import structlog
 
-from ..utils.config import settings
+from utils.config import settings
 
 logger = structlog.get_logger(__name__)
 

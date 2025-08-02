@@ -16,7 +16,7 @@ import speech_recognition as sr
 from pydub import AudioSegment
 import structlog
 
-from ...utils.config import settings
+from utils.config import settings
 
 logger = structlog.get_logger(__name__)
 

@@ -11,7 +11,7 @@ import numpy as np
 from textstat import textstat
 import structlog
 
-from ...utils.config import settings
+from utils.config import settings
 
 logger = structlog.get_logger(__name__)
 

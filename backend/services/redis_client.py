@@ -12,7 +12,7 @@ from datetime import timedelta
 import redis.asyncio as redis
 import structlog
 
-from ..utils.config import settings
+from utils.config import settings
 
 logger = structlog.get_logger(__name__)
 

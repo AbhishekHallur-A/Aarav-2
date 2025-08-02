@@ -12,7 +12,7 @@ from fastapi import Request, Response, HTTPException
 from fastapi.responses import JSONResponse
 import structlog
 
-from ..utils.config import settings
+from utils.config import settings
 
 logger = structlog.get_logger(__name__)
 

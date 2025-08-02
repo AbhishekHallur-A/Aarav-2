@@ -13,7 +13,7 @@ from transformers import AutoTokenizer, AutoModel, T5Tokenizer, T5ForConditional
 from sentence_transformers import SentenceTransformer
 import structlog
 
-from ...utils.config import settings
+from utils.config import settings
 
 logger = structlog.get_logger(__name__)
 
