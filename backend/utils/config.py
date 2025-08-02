@@ -117,6 +117,13 @@ class Settings(BaseSettings):
     BIAS_DETECTION_ENABLED: bool = Field(default=True, env="BIAS_DETECTION_ENABLED")
     MISINFORMATION_FILTER_ENABLED: bool = Field(default=True, env="MISINFORMATION_FILTER_ENABLED")
     CONTENT_SAFETY_THRESHOLD: float = Field(default=0.8, env="CONTENT_SAFETY_THRESHOLD")
+    MISINFORMATION_THRESHOLD: float = Field(default=0.7, env="MISINFORMATION_THRESHOLD")
+    
+    # Additional Settings
+    SEARCH_QUERY_RETENTION_DAYS: int = Field(default=90, env="SEARCH_QUERY_RETENTION_DAYS")
+    RATE_LIMIT_EXEMPT_IPS: List[str] = Field(default=[], env="RATE_LIMIT_EXEMPT_IPS")
+    ADMIN_IP_WHITELIST: List[str] = Field(default=["127.0.0.1", "::1"], env="ADMIN_IP_WHITELIST")
+    WHISPER_MODEL_SIZE: str = Field(default="base", env="WHISPER_MODEL_SIZE")
     
     @validator("DATABASE_URL", pre=True, always=True)
     def build_database_url(cls, v, values):
@@ -144,7 +151,7 @@ class Settings(BaseSettings):
         
         return f"redis://{auth}{values.get('REDIS_HOST')}:{values.get('REDIS_PORT')}/{values.get('REDIS_DB')}"
     
-    @validator("ALLOWED_HOSTS", "ALLOWED_ORIGINS", "ALLOWED_IMAGE_TYPES", pre=True)
+    @validator("ALLOWED_HOSTS", "ALLOWED_ORIGINS", "ALLOWED_IMAGE_TYPES", "RATE_LIMIT_EXEMPT_IPS", "ADMIN_IP_WHITELIST", pre=True)
     def parse_list_from_string(cls, v):
         """Parse comma-separated string into list"""
         if isinstance(v, str):
