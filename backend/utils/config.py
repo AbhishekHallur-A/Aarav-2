@@ -5,8 +5,9 @@ Uses Pydantic Settings for type-safe configuration with environment variable sup
 
 import os
 from typing import List, Optional
-from pydantic import BaseSettings, Field, validator
+from pydantic import BaseModel, Field, field_validator
 from pydantic.networks import PostgresDsn, RedisDsn
+from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
@@ -21,13 +22,13 @@ class Settings(BaseSettings):
     ENVIRONMENT: str = Field(default="development", env="ENVIRONMENT")
     
     # Security Settings
-    SECRET_KEY: str = Field(..., env="SECRET_KEY")
+    SECRET_KEY: str = Field(default="your-secret-key-here", env="SECRET_KEY")
     ALLOWED_HOSTS: List[str] = Field(default=["localhost", "127.0.0.1"], env="ALLOWED_HOSTS")
     ALLOWED_ORIGINS: List[str] = Field(default=["http://localhost:3000"], env="ALLOWED_ORIGINS")
     ACCESS_TOKEN_EXPIRE_MINUTES: int = Field(default=30, env="ACCESS_TOKEN_EXPIRE_MINUTES")
     
     # Database Settings
-    DATABASE_URL: Optional[PostgresDsn] = Field(env="DATABASE_URL")
+    DATABASE_URL: Optional[PostgresDsn] = Field(default=None, env="DATABASE_URL")
     DATABASE_HOST: str = Field(default="localhost", env="DATABASE_HOST")
     DATABASE_PORT: int = Field(default=5432, env="DATABASE_PORT")
     DATABASE_USER: str = Field(default="astrafind", env="DATABASE_USER")
@@ -37,7 +38,7 @@ class Settings(BaseSettings):
     DATABASE_MAX_OVERFLOW: int = Field(default=30, env="DATABASE_MAX_OVERFLOW")
     
     # Redis Settings
-    REDIS_URL: Optional[RedisDsn] = Field(env="REDIS_URL")
+    REDIS_URL: Optional[RedisDsn] = Field(default=None, env="REDIS_URL")
     REDIS_HOST: str = Field(default="localhost", env="REDIS_HOST")
     REDIS_PORT: int = Field(default=6379, env="REDIS_PORT")
     REDIS_PASSWORD: Optional[str] = Field(default=None, env="REDIS_PASSWORD")
@@ -92,18 +93,18 @@ class Settings(BaseSettings):
     )
     
     # Cloud Storage Settings
-    AWS_ACCESS_KEY_ID: Optional[str] = Field(env="AWS_ACCESS_KEY_ID")
-    AWS_SECRET_ACCESS_KEY: Optional[str] = Field(env="AWS_SECRET_ACCESS_KEY")
+    AWS_ACCESS_KEY_ID: Optional[str] = Field(default=None, env="AWS_ACCESS_KEY_ID")
+    AWS_SECRET_ACCESS_KEY: Optional[str] = Field(default=None, env="AWS_SECRET_ACCESS_KEY")
     AWS_REGION: str = Field(default="us-east-1", env="AWS_REGION")
-    AWS_S3_BUCKET: Optional[str] = Field(env="AWS_S3_BUCKET")
+    AWS_S3_BUCKET: Optional[str] = Field(default=None, env="AWS_S3_BUCKET")
     
     # GCP Settings
-    GCP_PROJECT_ID: Optional[str] = Field(env="GCP_PROJECT_ID")
-    GCP_CREDENTIALS_PATH: Optional[str] = Field(env="GCP_CREDENTIALS_PATH")
-    GCP_STORAGE_BUCKET: Optional[str] = Field(env="GCP_STORAGE_BUCKET")
+    GCP_PROJECT_ID: Optional[str] = Field(default=None, env="GCP_PROJECT_ID")
+    GCP_CREDENTIALS_PATH: Optional[str] = Field(default=None, env="GCP_CREDENTIALS_PATH")
+    GCP_STORAGE_BUCKET: Optional[str] = Field(default=None, env="GCP_STORAGE_BUCKET")
     
     # Monitoring Settings
-    SENTRY_DSN: Optional[str] = Field(env="SENTRY_DSN")
+    SENTRY_DSN: Optional[str] = Field(default=None, env="SENTRY_DSN")
     ENABLE_METRICS: bool = Field(default=True, env="ENABLE_METRICS")
     LOG_LEVEL: str = Field(default="INFO", env="LOG_LEVEL")
     
@@ -118,7 +119,7 @@ class Settings(BaseSettings):
     MISINFORMATION_FILTER_ENABLED: bool = Field(default=True, env="MISINFORMATION_FILTER_ENABLED")
     CONTENT_SAFETY_THRESHOLD: float = Field(default=0.8, env="CONTENT_SAFETY_THRESHOLD")
     
-    @validator("DATABASE_URL", pre=True, always=True)
+    @field_validator("DATABASE_URL", mode='before')
     def build_database_url(cls, v, values):
         """Build database URL from individual components if not provided"""
         if v:
@@ -133,7 +134,7 @@ class Settings(BaseSettings):
             path=f"/{values.get('DATABASE_NAME')}"
         )
     
-    @validator("REDIS_URL", pre=True, always=True)
+    @field_validator("REDIS_URL", mode='before')
     def build_redis_url(cls, v, values):
         """Build Redis URL from individual components if not provided"""
         if v:
@@ -144,14 +145,14 @@ class Settings(BaseSettings):
         
         return f"redis://{auth}{values.get('REDIS_HOST')}:{values.get('REDIS_PORT')}/{values.get('REDIS_DB')}"
     
-    @validator("ALLOWED_HOSTS", "ALLOWED_ORIGINS", "ALLOWED_IMAGE_TYPES", pre=True)
+    @field_validator("ALLOWED_HOSTS", "ALLOWED_ORIGINS", "ALLOWED_IMAGE_TYPES", mode='before')
     def parse_list_from_string(cls, v):
         """Parse comma-separated string into list"""
         if isinstance(v, str):
             return [item.strip() for item in v.split(",") if item.strip()]
         return v
     
-    @validator("LOG_LEVEL")
+    @field_validator("LOG_LEVEL")
     def validate_log_level(cls, v):
         """Validate log level"""
         valid_levels = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
@@ -159,10 +160,11 @@ class Settings(BaseSettings):
             raise ValueError(f"LOG_LEVEL must be one of {valid_levels}")
         return v.upper()
     
-    class Config:
-        env_file = ".env"
-        env_file_encoding = "utf-8"
-        case_sensitive = True
+    model_config = {
+        "env_file": ".env",
+        "env_file_encoding": "utf-8",
+        "case_sensitive": True
+    }
 
 
 # Create settings instance
