@@ -87,12 +87,8 @@ const VoiceSearch: React.FC<VoiceSearchProps> = ({
 
       for (let i = event.resultIndex; i < event.results.length; i++) {
         const result = event.results[i];
-        if (result.isFinal) {
-          finalTranscript += result[0].transcript;
-          setConfidence(result[0].confidence);
-        } else {
-          interimTranscript += result[0].transcript;
-        }
+        finalTranscript += result.transcript;
+        setConfidence(result.confidence);
       }
 
       setTranscript(finalTranscript);
